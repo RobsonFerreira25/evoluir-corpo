@@ -30,7 +30,7 @@ export interface CircuitExercise {
   reps?: number;
 }
 
-// Exercise database with ExerciseDB API GIFs
+// Exercise database with real workout GIFs
 export const exercises: Exercise[] = [
   // CHEST EXERCISES
   {
@@ -50,7 +50,7 @@ export const exercises: Exercise[] = [
       'Cotovelos muito abertos',
       'Não completar a amplitude do movimento'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/vfR8vL-K9sA-pq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif',
     caloriesPerMinute: 8,
     difficulty: 'beginner'
   },
@@ -71,7 +71,7 @@ export const exercises: Exercise[] = [
       'Movimentos muito rápidos',
       'Apoio instável'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/2TFsXv6Vg1FGLm',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Incline-Push-Up.gif',
     caloriesPerMinute: 6,
     difficulty: 'beginner'
   },
@@ -92,7 +92,7 @@ export const exercises: Exercise[] = [
       'Cotovelos abrindo para fora',
       'Amplitude incompleta'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/PHwKXrxaJL0jCE',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Diamond-Push-up.gif',
     caloriesPerMinute: 10,
     difficulty: 'intermediate'
   },
@@ -113,7 +113,7 @@ export const exercises: Exercise[] = [
       'Olhar para os pés ao invés do chão',
       'Superfície instável para os pés'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/8RZlJu3LkKL0Cq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Decline-Push-Up.gif',
     caloriesPerMinute: 11,
     difficulty: 'advanced'
   },
@@ -136,7 +136,7 @@ export const exercises: Exercise[] = [
       'Subir demais tirando a lombar do chão',
       'Prender a respiração'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/Q4XzPfKQVjvPxq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif',
     caloriesPerMinute: 5,
     difficulty: 'beginner'
   },
@@ -157,7 +157,7 @@ export const exercises: Exercise[] = [
       'Usar impulso para subir',
       'Descer as pernas muito rápido'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/CbpMJAuyjX3jzK',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Raise.gif',
     caloriesPerMinute: 6,
     difficulty: 'beginner'
   },
@@ -178,7 +178,7 @@ export const exercises: Exercise[] = [
       'Perder a postura do tronco',
       'Movimentos muito rápidos'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/WLq2VPvrAqEjsq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Russian-Twist.gif',
     caloriesPerMinute: 7,
     difficulty: 'intermediate'
   },
@@ -199,7 +199,7 @@ export const exercises: Exercise[] = [
       'Prender a respiração',
       'Pescoço desalinhado'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/Q2ENWQV8jJhJxq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Plank.gif',
     caloriesPerMinute: 4,
     difficulty: 'beginner'
   },
@@ -220,7 +220,7 @@ export const exercises: Exercise[] = [
       'Perder o ritmo',
       'Não trazer o joelho suficientemente perto'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/0GHUJTvE3FEjxq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Mountain-Climber.gif',
     caloriesPerMinute: 12,
     difficulty: 'intermediate'
   },
@@ -243,7 +243,7 @@ export const exercises: Exercise[] = [
       'Não contrair os glúteos no topo',
       'Pés muito longe ou perto do quadril'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/0QAc3l3J1KrJxq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Glute-Bridge.gif',
     caloriesPerMinute: 5,
     difficulty: 'beginner'
   },
@@ -264,7 +264,7 @@ export const exercises: Exercise[] = [
       'Calcanhares saindo do chão',
       'Lombar arredondando'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/OKdRqv3J1KrJxq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Squat.gif',
     caloriesPerMinute: 8,
     difficulty: 'beginner'
   },
@@ -285,7 +285,7 @@ export const exercises: Exercise[] = [
       'Movimento muito rápido',
       'Flexionar o joelho'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/K8RlJu3LkKL0Cq',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Side-Lying-Hip-Abduction.gif',
     caloriesPerMinute: 4,
     difficulty: 'beginner'
   },
@@ -306,7 +306,7 @@ export const exercises: Exercise[] = [
       'Perder a estabilidade do core',
       'Amplitude excessiva'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/L9SlKu4MlLM1Dr',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Fire-Hydrant.gif',
     caloriesPerMinute: 5,
     difficulty: 'beginner'
   },
@@ -327,7 +327,7 @@ export const exercises: Exercise[] = [
       'Perder o equilíbrio',
       'Tronco inclinando para frente'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/M0TmLv5NmMN2Es',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lunges.gif',
     caloriesPerMinute: 9,
     difficulty: 'intermediate'
   },
@@ -348,7 +348,7 @@ export const exercises: Exercise[] = [
       'Perder a estabilidade do core',
       'Não contrair o glúteo'
     ],
-    gifUrl: 'https://api.exercisedb.io/image/N1UnMw6OnNO3Ft',
+    gifUrl: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Donkey-Kicks.gif',
     caloriesPerMinute: 6,
     difficulty: 'beginner'
   },
