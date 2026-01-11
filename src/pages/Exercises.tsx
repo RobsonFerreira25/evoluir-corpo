@@ -58,9 +58,10 @@ const Exercises = () => {
               <div className="flex gap-4">
                 <div className="w-20 h-20 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
                   <img 
-                    src={`https://via.placeholder.com/80x80/f97316/ffffff?text=${encodeURIComponent(exercise.name.charAt(0))}`}
+                    src={exercise.gifUrl}
                     alt={exercise.name}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
                 
@@ -105,11 +106,12 @@ const Exercises = () => {
           <CollapsibleContent>
             <div className="px-4 pb-4 border-t pt-4 space-y-4 animate-fade-in">
               {/* Exercise GIF */}
-              <div className="aspect-video rounded-lg bg-muted overflow-hidden">
+              <div className="aspect-video rounded-lg bg-muted overflow-hidden flex items-center justify-center">
                 <img 
-                  src={`https://via.placeholder.com/400x225/f97316/ffffff?text=${encodeURIComponent(exercise.name)}`}
+                  src={exercise.gifUrl}
                   alt={exercise.name}
-                  className="w-full h-full object-cover"
+                  className="max-w-full max-h-full object-contain"
+                  loading="lazy"
                 />
               </div>
               

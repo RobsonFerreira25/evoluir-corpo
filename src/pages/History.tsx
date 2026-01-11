@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +11,32 @@ import {
   Zap, 
   Calendar,
   TrendingUp,
-  Dumbbell
+  Dumbbell,
+  Scale,
+  LineChart
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LevelBadge } from '@/components/ui/level-badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import { 
+  LineChart as RechartsLineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area
+} from 'recharts';
 
 interface WorkoutSession {
   id: string;
@@ -26,28 +47,46 @@ interface WorkoutSession {
   completed_at: string;
 }
 
+interface WeightRecord {
+  id: string;
+  weight: number;
+  recorded_at: string;
+}
+
 const History = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
+  const [weightHistory, setWeightHistory] = useState<WeightRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSessions = async () => {
+    const fetchData = async () => {
       if (!user) return;
       
-      const { data, error } = await supabase
-        .from('workout_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('completed_at', { ascending: false });
+      const [sessionsRes, weightRes] = await Promise.all([
+        supabase
+          .from('workout_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('completed_at', { ascending: false }),
+        supabase
+          .from('weight_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('recorded_at', { ascending: true })
+      ]);
       
-      if (!error && data) {
-        setSessions(data as WorkoutSession[]);
+      if (!sessionsRes.error && sessionsRes.data) {
+        setSessions(sessionsRes.data as WorkoutSession[]);
+      }
+      if (!weightRes.error && weightRes.data) {
+        setWeightHistory(weightRes.data as WeightRecord[]);
       }
       setLoading(false);
     };
     
-    fetchSessions();
+    fetchData();
   }, [user]);
 
   const formatDuration = (seconds: number) => {
@@ -60,6 +99,62 @@ const History = () => {
     workouts: sessions.length,
     totalTime: sessions.reduce((acc, s) => acc + s.duration_seconds, 0),
     totalCalories: sessions.reduce((acc, s) => acc + s.calories_burned, 0),
+  };
+
+  // Prepare weight chart data
+  const weightChartData = weightHistory.length > 0 
+    ? weightHistory.map(w => ({
+        date: format(new Date(w.recorded_at), 'dd/MM'),
+        weight: w.weight,
+        fullDate: format(new Date(w.recorded_at), "d 'de' MMMM", { locale: ptBR })
+      }))
+    : profile 
+      ? [{ date: 'Hoje', weight: profile.weight, fullDate: 'Peso atual' }]
+      : [];
+
+  // Prepare weekly calories chart data
+  const getWeeklyCaloriesData = () => {
+    const today = new Date();
+    const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+    const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+    
+    return days.map(day => {
+      const dayCalories = sessions
+        .filter(s => isSameDay(new Date(s.completed_at), day))
+        .reduce((acc, s) => acc + s.calories_burned, 0);
+      
+      return {
+        day: format(day, 'EEE', { locale: ptBR }),
+        calories: Math.round(dayCalories),
+        fullDate: format(day, "d 'de' MMMM", { locale: ptBR })
+      };
+    });
+  };
+
+  const weeklyCaloriesData = getWeeklyCaloriesData();
+
+  // Prepare workout frequency data (last 30 days)
+  const getWorkoutFrequencyData = () => {
+    const data = [];
+    for (let i = 29; i >= 0; i--) {
+      const day = subDays(new Date(), i);
+      const count = sessions.filter(s => isSameDay(new Date(s.completed_at), day)).length;
+      data.push({
+        date: format(day, 'dd'),
+        treinos: count,
+        fullDate: format(day, "d 'de' MMMM", { locale: ptBR })
+      });
+    }
+    return data;
+  };
+
+  const workoutFrequencyData = getWorkoutFrequencyData();
+
+  const chartConfig = {
+    weight: { label: "Peso", color: "hsl(var(--primary))" },
+    calories: { label: "Calorias", color: "hsl(var(--chart-2))" },
+    treinos: { label: "Treinos", color: "hsl(var(--chart-3))" },
   };
 
   return (
@@ -110,6 +205,159 @@ const History = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Charts Section */}
+        <Tabs defaultValue="calories" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="calories" className="flex items-center gap-1">
+              <Zap className="w-4 h-4" />
+              <span className="hidden sm:inline">Calorias</span>
+            </TabsTrigger>
+            <TabsTrigger value="weight" className="flex items-center gap-1">
+              <Scale className="w-4 h-4" />
+              <span className="hidden sm:inline">Peso</span>
+            </TabsTrigger>
+            <TabsTrigger value="frequency" className="flex items-center gap-1">
+              <LineChart className="w-4 h-4" />
+              <span className="hidden sm:inline">Frequência</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="calories">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary" />
+                  Calorias Queimadas (Semana)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                  <BarChart data={weeklyCaloriesData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="day" 
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent />}
+                    />
+                    <Bar 
+                      dataKey="calories" 
+                      fill="hsl(var(--primary))" 
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="weight">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-primary" />
+                  Evolução do Peso
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {weightChartData.length > 1 ? (
+                  <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                    <AreaChart data={weightChartData}>
+                      <defs>
+                        <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 12 }}
+                        tickLine={false}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        tickLine={false}
+                        axisLine={false}
+                        domain={['dataMin - 2', 'dataMax + 2']}
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                      />
+                      <Area 
+                        type="monotone"
+                        dataKey="weight" 
+                        stroke="hsl(var(--primary))" 
+                        fill="url(#weightGradient)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ChartContainer>
+                ) : (
+                  <div className="h-[200px] flex flex-col items-center justify-center text-muted-foreground">
+                    <Scale className="w-12 h-12 mb-4 opacity-50" />
+                    <p className="text-sm">Registre seu peso regularmente</p>
+                    <p className="text-xs">para ver sua evolução aqui</p>
+                    {profile && (
+                      <p className="text-lg font-semibold mt-2 text-foreground">
+                        Peso atual: {profile.weight} kg
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="frequency">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <LineChart className="w-4 h-4 text-primary" />
+                  Frequência de Treinos (30 dias)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                  <RechartsLineChart data={workoutFrequencyData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      interval={4}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent />}
+                    />
+                    <Line 
+                      type="monotone"
+                      dataKey="treinos" 
+                      stroke="hsl(var(--chart-3))" 
+                      strokeWidth={2}
+                      dot={{ fill: "hsl(var(--chart-3))", r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </RechartsLineChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Session List */}
         <Card>
